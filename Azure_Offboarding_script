@@ -2,12 +2,13 @@
 #This was made primarily for SSG but can be used with any o365 tenant. 
 #Just make sure to tweak some stuff like the "X-" in display names. Those lines can be commented out if desired.
 
-# Connect to Azure AD and exchange online
+# Connect to Azure AD\Exchange\MSOnline modules
 if((Read-Host -Prompt "Do you need to connect to AzureAD and or ExchangeOnline Modules? (yes/no)") -eq 'yes')
 {
+
+    Connect-MsolService | Out-Null
     Connect-AzureAD | Out-Null
-    Connect-ExchangeOnline
-		Connect-MsolService
+    Connect-ExchangeOnline | Out-Null
 }
 
 
@@ -25,8 +26,19 @@ DO{#Using a do-while for multiple offboardings, will be prompted if there are mo
     # Get the user
     $user = Get-AzureADUser -ObjectId (Read-Host -Prompt "Please enter the users UPN")
 
-    if((Read-Host -Prompt "Are you sure you would like to offboard: $($user.UserPrincipalName)?. (yes/no)") -eq 'yes')
-    {
+        #Check if user is already offboarded (this is specific to SSG)
+        if($user.DisplayName -like "*X-*"){
+
+            Write-Host -ForegroundColor Red "*** User is already offboarded per display name: $($user.DisplayName)"
+    
+            if ((Read-Host -Prompt "Would you like to continue with the offboarding script? (yes/no)") -eq 'no') {
+                
+                Write-Host -ForegroundColor Green "`n***** Exiting Script *****`n"
+                exit
+    
+            }
+    
+        }
 
     Write-Host -ForegroundColor Yellow "`nBeginning offboarding process for: $($user.UserPrincipalName)"
 
@@ -49,11 +61,12 @@ DO{#Using a do-while for multiple offboardings, will be prompted if there are mo
     Write-Host -ForegroundColor Cyan "Display Name Updated with 'X' in front.`n"
    
 
-    #Wait 15 seconds before moving on. Some groups are controlled by GAL visibility
+    #Wait 5 seconds before moving on. Some groups are controlled by GAL visibility
     Start-Sleep -seconds 5
 
     # Remove the user from all groups and print the group names
     $groups = Get-AzureADUserMembership -ObjectId $user.UserPrincipalName
+    Write-Host -ForegroundColor Yellow "Removed from groups:"
     foreach ($group in $groups) 
     {
 
@@ -61,7 +74,7 @@ DO{#Using a do-while for multiple offboardings, will be prompted if there are mo
         {
 
         Remove-AzureADGroupMember -ObjectId $group.ObjectId -MemberId $user.ObjectId
-        Write-Host -ForegroundColor Cyan "Removed from group: $($group.DisplayName)"
+        Write-Host -ForegroundColor Cyan "$($group.DisplayName)"
 
         }
         catch #Some DL groups are controlled by GAL visibility and cannot be removed this way ¯\_(ツ)_/¯ at least for SSG
@@ -74,12 +87,12 @@ DO{#Using a do-while for multiple offboardings, will be prompted if there are mo
 
     }
 
-     Write-Host -ForegroundColor Green "`nDevices associated to user per intune:"
-     Get-MsolDevice -RegisteredOwnerUpn $user.UserPrincipalName | fl DisplayName,DeviceOsType,DeviceTrustLevel,Enabled,ApproximateLastLogonTimestamp
+     Write-Host -ForegroundColor Yellow "`nDevices associated to user per intune:"
+     Get-MsolDevice -RegisteredOwnerUpn $user.UserPrincipalName | fl DisplayName,DeviceOsType,DeviceTrustLevel,DeviceTrustType,Enabled,ApproximateLastLogonTimestamp
 
-     Write-Host -ForegroundColor Yellow "Process completed for: $($user.UserPrincipalName)"
+     Write-Host -ForegroundColor Yellow "Process completed for: $($user.DisplayName) || $($user.UserPrincipalName)"
 
-    } 
+    
 
     else
 
