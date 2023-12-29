@@ -21,7 +21,7 @@ Write-Host -ForegroundColor Yellow "This script will perform the following actio
 
 #Prompts user to enter filepath for CSV. MIGHT need " " if there are spaces in the filepath.
 
-$user_list = Import-Csv (Read-Host -Prompt "`nEnter filepath of CSV, including name of CSV and file extension. (Will need to surround path in quotes if there are spaces")
+$user_list = Import-Csv (Read-Host -Prompt "`nEnter filepath of CSV, including name of CSV and file extension. (Will need to surround path in quotes ONLY IF there are spaces")
 
 
 foreach ($user_object in $user_list){
