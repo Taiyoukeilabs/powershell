@@ -4,19 +4,16 @@ if((Read-Host -Prompt "Do you need to connect to AzureAD\MsolService Modules? (y
  
 }
 
-$user_list = Import-Csv (Read-Host -Prompt "`nEnter filepath of CSV (incliding file itself)")
+$user_list = Import-Csv (Read-Host -Prompt "`nEnter filepath of CSV (including file itself)")
 
 $userOutput = @()
 
 foreach ($user_object in $user_list){
 
-    $upn = $user_object.UserPrincipalName
-    $user = Get-AzureADUser -Filter "userPrincipalName eq '$upn'"
-
     #Keeping this line here as a reference
     #$userOutput += Get-MsolDevice -RegisteredOwnerUpn $user.UserPrincipalName | select @{E = {$user.UserPrincipalName}; N = "UserPrincipalName"},DisplayName,DeviceOsType,DeviceTrustLevel,DeviceTrustType,Enabled,ApproximateLastLogonTimestamp
 
-    $userOutput += Get-AzureADUser -ObjectId $user | select @{n='Alternate Email'; e={$_.OtherMails -join ' '}}, DisplayName,UserPrincipalName
+    $userOutput += Get-AzureADUser -ObjectId $user_object.userPrincipalName | select @{n='Alternate Email'; e={$_.OtherMails -join ' '}}, DisplayName,UserPrincipalName
 }
 
 
