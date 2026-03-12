@@ -1,4 +1,4 @@
-
+######### Remediation #########
 $RegPath   = 'HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters'
 $ValueName = 'DisabledComponents'
 
@@ -44,3 +44,20 @@ catch {
     Write-Error "Failed to set registry value. Error: $($_.Exception.Message)"
     throw
 }
+
+######### Detection #########
+
+$regkey = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters"
+$name = "DisabledComponents"
+$value = 0x20
+
+$existence = (Get-ItemPropertyvalue -path $regkey -Name $name)
+
+if ($existence -ne $value) {
+    Write-host "Not Found"
+    exit 1
+}
+    else {
+        Write-Host "Found"
+        exit 0
+    }
