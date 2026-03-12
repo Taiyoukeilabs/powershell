@@ -4,7 +4,7 @@ $ValueName = 'DisabledComponents'
 
 # If you intend to use hex 0x20 instead, use: $Desired = 0x20   # (= 32 decimal)
 #$Desired   = [uint32]32   # decimal 20
-$Desired   = 0x20
+$Desired = [uint32]0x20
 
 
 try {
