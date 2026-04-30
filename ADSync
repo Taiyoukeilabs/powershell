@@ -26,7 +26,7 @@ try {
     Write-Progress @ProgressParams
 
     # 3. Trigger the Delta Sync
-    $SyncResult = Start-ADSyncSyncCycle -PolicyType Delta
+    Start-ADSyncSyncCycle -PolicyType Delta
 
     # Update Progress
     $ProgressParams.Status = "Sync triggered successfully. Finalizing..."
